@@ -2,7 +2,7 @@
 /*Structure used in the HBTNodes*/
 STATUS = {
 
-	success:1, 
+	success:0, 
 	running:1, 
 	fail:2
 }
@@ -152,7 +152,7 @@ function HBTproperty()
     this.boxcolor = "#999";
   	var w = 125;
     var h = 25;
-    this.addOutput("","number", {pos:[w,15], dir:LiteGraph.RIGHT});
+    this.addOutput("","", {pos:[w,15], dir:LiteGraph.RIGHT});
     this.flags = {};
   	this.properties = {value:null};
     this.data = {};
@@ -584,7 +584,7 @@ function InTarget()
     this.editable = { property:"value", type:"number" };
     this.flags = { resizable: false };
     this.data = {threshold:100};
-	this.properties = {threshold:100}
+	this.properties = {threshold:250}
     this.widgets_up = true;
 }
 
@@ -663,8 +663,8 @@ InTarget.prototype.isInTarget = function(agent)
 InTarget.prototype.inTarget = function( agent, target, threshold)
 {
 	var current_pos = []; 
-	current_pos[0] = agent.skeleton.skeleton_container.getGlobalPosition()[0];
-	current_pos[1] = agent.skeleton.skeleton_container.getGlobalPosition()[2];
+	current_pos[0] = agent.scene_node.getGlobalPosition()[0];
+	current_pos[1] = agent.scene_node.getGlobalPosition()[2];
 
 	var a = vec2.fromValues(current_pos[0],current_pos[1]);
 	var b = vec2.fromValues(target.pos[0],target.pos[2]);
@@ -938,7 +938,7 @@ Sequencer.prototype.tick = function(agent, dt)
 						graph.description_stack.push(child.description); 
 					} 
 				}
-				value.STATUS = success;
+				value.STATUS = STATUS.success;
 				return value;
 			}
 			if(value.STATUS == STATUS.success)
@@ -956,7 +956,7 @@ Sequencer.prototype.tick = function(agent, dt)
 				}
 			}
 			if(n == children.length-1 && value.STATUS == STATUS.success && agent.bt_info.running_node_index == null)
-				return STATUS.success;
+				return value;
 			//Value debería ser success, fail, o running
 			if(value.STATUS == STATUS.fail)
 				return value;
@@ -1263,7 +1263,7 @@ function SimpleAnimate()
     this.editable = { property:"value", type:"number" };
   	this.widgets_up = true;
 	this.horizontal = true;
-  	this.properties = {anims:[{name:null, weight: 1}], motion:0, speed:1, src:"david8more/projects/SAUCE/Animations/", filename:"Walking"};
+  	this.properties = {anims:[{name:null, weight: 1}], motion:0, speed:1, src:"david8more/projects/SAUCE/Animations/", filename:""};
   	var that = this;
     this.widget = this.addWidget("string","", this.properties.filename, function(v){ that.properties.filename = v; }, this.properties  );
   	this.number = this.addWidget("number","motion", this.properties.motion, function(v){ that.properties.motion = v; }, this.properties  );
@@ -1275,7 +1275,7 @@ SimpleAnimate.title = "SimpleAnimate ";
 SimpleAnimate.prototype.tick = function(agent, dt)
 {
   
-  if(agent.animator)
+  if(agent.animationBlender)
   {
   	if(this.action)
 	{
@@ -1304,9 +1304,27 @@ SimpleAnimate.prototype.action = function(agent)
 	this.graph.current_behaviour.type = B_TYPE.animateSimple;
 	this.graph.current_behaviour.STATUS = STATUS.success;
 	this.graph.current_behaviour.setData(behaviour);
-//	agent.animationBlender.applyBehaviour(behaviour);
+	agent.animationBlender.applyBehaviour(behaviour);
 //	agent.animator._base_animation._animation = this.properties.src + this.properties.filename;
 	return this.graph.current_behaviour;
+}
+
+SimpleAnimate.prototype.onPropertyChanged = function(name,value)
+{
+    if(name == "filename"){
+        this.widget.value = value;
+        // this.data.limit_value = value;
+    }
+
+    if(name == "motion"){
+        this.number.value = value;
+        // this.data.limit_value = value;
+    }
+
+	if(name == "speed"){
+        this.number2.value = value;
+        // this.data.limit_value = value;
+    }
 }
 
 
@@ -1376,6 +1394,7 @@ EQSNearestInterestPoint.prototype.onExecute = function()
             var type_ip = CORE.Scene.properties.interest_points[type][j];
             var ip = type_ip.pos;
 			if(!agent_evaluated) return;
+			if(!agent_evaluated.skeleton.skeleton_container) return;
             var agent_pos = agent_evaluated.skeleton.skeleton_container.getGlobalPosition();
             var dist = vec3.dist(ip, agent_pos);
     
@@ -1469,7 +1488,7 @@ LookAt.prototype.onDrawBackground = function(ctx, canvas)
 {
     ctx.font = "12px Arial";
     ctx.fillStyle = "#AAA";
-    ctx.fillText(`Look at Node`,10,35);
+    ctx.fillText(`Look at Node`,10,40);
 }
 
 LookAt.prototype.onExecute = function(ctx, canvas)
@@ -1483,16 +1502,16 @@ LookAt.prototype.onConfigure = function(info)
 {
     onConfig(info, this.graph);
 }
-LiteGraph.registerNodeType("btree/LookAt", LookAt);
+LiteGraph.registerNodeType("btree/LookAt", LookAt);8
 
 
-var B_TYPE = {
+var B_TYPE = 
+{
 	moveTo:0, 
 	lookAt:1, 
 	animateSimple:2, 
 	wait:3, 
 	nextTarget:4
-	
 }
 
 /*To encapsulate the result somewhere*/
