@@ -129,7 +129,7 @@ MyNode.title = "MyNode";
 MyNode.desc = "MyNode description";
 
 //register
-LiteGraph.registerNodeType("btree/Root", RootNode);
+LiteGraph.registerNodeType("btree/MyNode", MyNode);
 ```
 
 The tick method is called for all the nodes of the Hybrid Behaviour Trees except for those which do not have a top connections. In other words, if the node just outputs some informations to another node, the tick method is not called. 
