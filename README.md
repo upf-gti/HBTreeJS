@@ -136,7 +136,6 @@ The tick method is called for all the nodes of the Hybrid Behaviour Trees except
 
 The onExecute method is called when there is an execution required, like some calculations for inner properties of the node, or to output the computation to other nodes. 
 
-Inside nodes, you might want to call external 
 
 # Architecture of the library
 
