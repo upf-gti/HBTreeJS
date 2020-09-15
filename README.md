@@ -3,13 +3,14 @@ Library for decision making using Hybrid Behaviour Trees, an evolution of classi
 
 # How to use HBTree.js
 
-Every time you wnat to use HBTree.js, you must create a context, understanding by context the surroundings of the virtual character we want to evaluate. 
+Every time you want to use HBTree.js, you must create a context, understanding by context the surroundings of the virtual character we want to evaluate, and a graph, which could be understood as the "brain" of the virtual character. 
 
 ```javascript
 var context = new HBTContext();
+var hbt_graph = new HBTGraph("graph_name");
 ```
 
-As this library aims to evaluate scene properties, as distances between virtual characters or some points of the scene, there are some nodes which requires methods from the render engine. To solve that and make this library usable for every Javascript render engine, we have developed an API, so if you are using a different render engine, you just have to overwrite the methods of the facade.js
+As this library aims to evaluate scene properties, as distances between virtual characters or some points of the scene, there are some nodes which requires methods from the render engine. To solve that and make this library usable for every Javascript render engine, we have developed an API, so if you are using a different render engine, you just have to overwrite the methods of the Facade, class privided in the bottom of the HBTree.js file:
 
 ```javascript
 context.facade.getEntityPosition = function ( entity )
@@ -21,23 +22,17 @@ context.facade.getEntityPosition = function ( entity )
 After that, you should load a JSON file containing a hybrid behaviour (created on [Medusa](https://webglstudio.org/users/dmoreno/projects/ondev/saucemedusa/) or downloaded from the [open repository](https://webglstudio.org/users/dmoreno/projects/repo/))  
 
 ```javascript
-context.current_graph.graph.configure(loaded_behaviour);
-```
-
-In case you want to load more than one behaviour, there is a container inside the context to store the different behaviours
-
-```javascript
-var new_HBTGraph = context.addHBTGraph(name);
+hbt_graph.graph.configure(loaded_behaviour); //loaded_behaviour must be an object from the parsed JSON, not the JSON
 ```
 
 To execute the Hybrid Behaviour Tree: 
 
 ```javascript
-var behaviour = context.evaluate(entity, dt, graph); //the third parameter could be the current one or another
+var behaviour = hbt_graph.runBehaviour( entity, context ,dt );
 // do whatever you want with the info provided in behaviour
 ```
 
-The behaviour variable contains the type of task which has been reached in the evaluation and the necessary information. For example, if it is a SimpleAnimate node, the necessary information will be the name of the animation to reproduce, the weight od the animation and the playback speed. 
+The behaviour variable contains the type of task which has been reached in the evaluation and the necessary information. For example, if it is a SimpleAnimate node, the necessary information will be the name of the animation to reproduce, the weight od the animation and the playback speed. It is important to understand that this library does not execute the behaviours, as it provides the freedom to do whatever the developer desires with the information. 
 
 As this library is still on development, new nodes will be added according to the necessities on evaluation stages, as well as modifications on the existing ones to improve it. 
 
